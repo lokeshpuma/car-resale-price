@@ -63,3 +63,13 @@ The app is powered by two pre-trained machine learning models:
 - If the app fails to load models, confirm the `.pkl` files exist and were created with a compatible scikit-learn version.
 - If predictions raise an error about input columns, the model may expect a different set of feature column names — check `car_price.ipynb` for the training preprocessing pipeline.
 - For development, you can run the notebook `car_price.ipynb` to retrain or inspect feature engineering.
+
+## Results
+
+- **What the app shows:** The app displays the "Predicted Selling Price" in Indian Rupees (₹) formatted to two decimal places.
+- **Model choice:** Select either **Linear Regression** or **Lasso Regression** from the sidebar; both use the same input features but may produce different estimates.
+- **Non-negative outputs:** Predictions are clamped to zero in the UI (negative predicted values are shown as ₹ 0.00).
+- **Interpreting a result:** Treat the prediction as an estimate — use it as a guide alongside market research, vehicle condition, and maintenance history.
+- **Example:** For a 2015 petrol manual car with 50,000 km, sold by an individual (First Owner), the app may show a predicted selling price like `₹ 3,45,000.00` (actual values depend on the trained model).
+
+If you'd like, I can add an automated example input section in the app or include a small set of sample inputs and expected outputs in `car_price.ipynb` for reproducibility.
