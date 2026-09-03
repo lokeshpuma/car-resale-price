@@ -19,12 +19,11 @@ The app is powered by two pre-trained machine learning models:
 1. **Clone the repository:**
    If this project is in a GitHub repository, clone it to your local machine.
 
-2. **Create and activate a virtual environment (optional but recommended):**
+2. **Create and activate a virtual environment (recommended):**
    ```bash
-   conda create -n tf python=3.10
-   conda activate tf
+   python -m venv .venv
+   source .venv/bin/activate
    ```
-   *(Note: The environment is named `tf`, matching the standard project configuration.)*
 
 3. **Install the dependencies:**
    Make sure you are in the project directory where the `requirements.txt` is located.
@@ -32,7 +31,12 @@ The app is powered by two pre-trained machine learning models:
    pip install -r requirements.txt
    ```
 
-4. **Run the Streamlit application:**
+4. **Verify model files are present:**
+   Ensure the following files exist in the project root:
+   - `car_price_lin.pkl`
+   - `car_price_lass.pkl`
+
+5. **Run the Streamlit application:**
    ```bash
    streamlit run app.py
    ```
@@ -53,3 +57,9 @@ The app is powered by two pre-trained machine learning models:
 - `car_price.ipynb`: Jupyter notebook containing data exploration and model training logic.
 - `car_price_lin.pkl` / `car_price_lass.pkl`: Serialized pre-trained machine learning models.
 - `car.csv`: Original dataset used to train the models.
+
+## Notes & Troubleshooting
+
+- If the app fails to load models, confirm the `.pkl` files exist and were created with a compatible scikit-learn version.
+- If predictions raise an error about input columns, the model may expect a different set of feature column names — check `car_price.ipynb` for the training preprocessing pipeline.
+- For development, you can run the notebook `car_price.ipynb` to retrain or inspect feature engineering.
