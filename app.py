@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import pickle
 import os
+from datetime import datetime
 
 # Set page configuration
 st.set_page_config(page_title="Car Price Predictor", page_icon="🚗", layout="centered")
@@ -12,16 +13,26 @@ st.markdown("Enter the details of the car below to predict its resale price usin
 # Load Models
 @st.cache_resource
 def load_models():
-    lin_model_path = os.path.join(os.path.dirname(__file__), 'car_price_lin.pkl')
-    lass_model_path = os.path.join(os.path.dirname(__file__), 'car_price_lass.pkl')
-    
-    with open(lin_model_path, 'rb') as f:
-        lin_model = pickle.load(f)
-        
-    with open(lass_model_path, 'rb') as f:
-        lass_model = pickle.load(f)
-        
-    return lin_model, lass_model
+    base_dir = os.path.dirname(__file__)
+    lin_model_path = os.path.join(base_dir, 'car_price_lin.pkl')
+    lass_model_path = os.path.join(base_dir, 'car_price_lass.pkl')
+
+    if not os.path.exists(lin_model_path) or not os.path.exists(lass_model_path):
+        st.error("Model files not found. Expected car_price_lin.pkl and car_price_lass.pkl in the project root.")
+        return None, None
+
+    try:
+        with open(lin_model_path, 'rb') as f:
+            lin_model = pickle.load(f)
+
+        with open(lass_model_path, 'rb') as f:
+            lass_model = pickle.load(f)
+
+        return lin_model, lass_model
+    except Exception as e:
+        st.error(f"Failed to load models: {e}")
+        return None, None
+
 
 lin_model, lass_model = load_models()
 
@@ -36,12 +47,13 @@ st.header("Car Details")
 col1, col2 = st.columns(2)
 
 with col1:
-    year = st.number_input("Year of Manufacture", min_value=1990, max_value=2024, value=2015, step=1)
+    current_year = datetime.now().year
+    year = st.number_input("Year of Manufacture", min_value=1990, max_value=current_year, value=2015, step=1)
     fuel = st.selectbox("Fuel Type", ["Petrol", "Diesel", "CNG", "LPG", "Electric"])
     transmission = st.selectbox("Transmission", ["Manual", "Automatic"])
 
 with col2:
-    km_driven = st.number_input("Kilometers Driven", min_value=1, max_value=1000000, value=50000, step=1000)
+    km_driven = st.number_input("Kilometers Driven", min_value=0, max_value=1000000, value=50000, step=1000)
     seller_type = st.selectbox("Seller Type", ["Individual", "Dealer", "Trustmark Dealer"])
     owner = st.selectbox("Owner Type", ["First Owner", "Second Owner", "Third Owner", "Fourth & Above Owner", "Test Drive Car"])
 
@@ -70,21 +82,24 @@ input_data = pd.DataFrame({
     'fuel_LPG': [fuel_LPG],
     'fuel_Petrol': [fuel_Petrol],
     'seller_type_Individual': [seller_type_Individual],
-    'seller_type_Trustmark Dealer': [seller_type_Trustmark_Dealer],
+    'seller_type_Trustmark_Dealer': [seller_type_Trustmark_Dealer],
     'transmission_Manual': [transmission_Manual],
-    'owner_Fourth & Above Owner': [owner_Fourth_Above_Owner],
-    'owner_Second Owner': [owner_Second_Owner],
-    'owner_Test Drive Car': [owner_Test_Drive_Car],
-    'owner_Third Owner': [owner_Third_Owner]
+    'owner_Fourth_Above_Owner': [owner_Fourth_Above_Owner],
+    'owner_Second_Owner': [owner_Second_Owner],
+    'owner_Test_Drive_Car': [owner_Test_Drive_Car],
+    'owner_Third_Owner': [owner_Third_Owner]
 })
 
 st.markdown("---")
 
-if st.button("Predict Price", type="primary"):
-    try:
-        prediction = model.predict(input_data)
-        # Ensure prediction is positive
-        pred_value = max(0, prediction[0])
-        st.success(f"### Predicted Selling Price: ₹ {pred_value:,.2f}")
-    except Exception as e:
-        st.error(f"An error occurred during prediction: {e}")
+if st.button("Predict Price"):
+    if model is None:
+        st.error("No model loaded. Cannot predict.")
+    else:
+        try:
+            prediction = model.predict(input_data)
+            # Ensure prediction is positive
+            pred_value = max(0, float(prediction[0]))
+            st.success(f"### Predicted Selling Price: ₹ {pred_value:,.2f}")
+        except Exception as e:
+            st.error(f"An error occurred during prediction: {e}")
